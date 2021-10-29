@@ -6,7 +6,7 @@
 
 int main() {
     std::cout.precision(10);
-    std::cout << "Programm für Hartree-Fock-Rechnungen an atomaren Systemen mit bis zu 2 Elektronen." << std::endl;
+    std::cout << "Programm für Hartree-Fock-Rechnungen an atomaren Systemen mit bis zu 4 Elektronen." << std::endl;
 
     int z; // Ordnungszahl des Kerns
     int n_alpha, n_beta; // Anzahl der alpha/beta Spinorbitale
@@ -160,6 +160,9 @@ int main() {
     double energie_alt = epsilon.trace();
     double e_uhf;
     int iter = 0;
+    Eigen::MatrixXd epsilon_alpha;
+    Eigen::MatrixXd epsilon_beta;
+
     while (diff_energie > conv) {
         iter++;
         std::cout << "\n\n================ " << "Iteration " << iter << " ================\n";
@@ -170,7 +173,7 @@ int main() {
         for (int k=0;k<n_gto;k++) {
             for (int l=0;l<n_gto;l++) {
                 for (int i=0;i<n_alpha;i++) {
-                    d_alpha(k, l) = c_alpha(k, i) * c_alpha(l, i);
+                    d_alpha(k, l) += c_alpha(k, i) * c_alpha(l, i);
                 }
             }
         }
@@ -180,7 +183,7 @@ int main() {
         for (int k=0;k<n_gto;k++) {
             for (int l=0;l<n_gto;l++) {
                 for (int i=0;i<n_beta;i++) {
-                    d_beta(k, l) = c_beta(k, i) * c_beta(l, i);
+                    d_beta(k, l) += c_beta(k, i) * c_beta(l, i);
                 }
             }
         }
@@ -228,11 +231,11 @@ int main() {
 
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver_f_alpha_tilde(f_alpha_tilde);
         Eigen::MatrixXd v_tilde = eigensolver_f_alpha_tilde.eigenvectors();
-        Eigen::MatrixXd epsilon_alpha = v_tilde.transpose() * f_alpha_tilde * v_tilde;
+        epsilon_alpha = v_tilde.transpose() * f_alpha_tilde * v_tilde;
 
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver_f_beta_tilde(f_beta_tilde);
         Eigen::MatrixXd w_tilde = eigensolver_f_beta_tilde.eigenvectors();
-        Eigen::MatrixXd epsilon_beta = w_tilde.transpose() * f_beta_tilde * w_tilde;
+        epsilon_beta = w_tilde.transpose() * f_beta_tilde * w_tilde;
 
         //std::cout << "\n\nEpsilon alpha und beta:\n" << epsilon_alpha << "\n\n" << epsilon_beta << "\n\n";
 
@@ -243,6 +246,10 @@ int main() {
     std::cout << "\n\n=== SCF-Procedur fertig nach " << iter << " Iterationen: ===\n"
             << "E = "
             << e_uhf << std::endl;
- 
+
+    //std::cout << "\nKoeffizienten alpha:\n" << c_alpha << "\nbeta:\n" << c_beta << "\n";
+    //std::cout << "\nOrbitalenergien\nalpha:\n" << epsilon_alpha.diagonal() << "\nbeta:\n" << epsilon_beta.diagonal() << "\n";
+
+
     return 0;
 }
