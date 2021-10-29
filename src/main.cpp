@@ -241,7 +241,7 @@ int main() {
     }
 
     std::cout << "\n\n=== SCF-Procedur fertig nach " << iter << " Iterationen: ===\n"
-            //<< "E = "
+            << "E = "
             << e_uhf << std::endl;
  
     return 0;
